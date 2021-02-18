@@ -22,7 +22,6 @@ Change default port value in application.properties
 # check the dex root README.md
 
 # runs the order service
-cd $HOME/pet-project/dex/services/order
 ./gradlew run
 ```
 
