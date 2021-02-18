@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: API for Dex
+  description: Consists of all end points for dex
+servers:
+  # Added by API Auto Mocking Plugin
+  - url: '{protocol}://{host}:{port}/'
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: http
+      host:
+        enum:
+          - 'localhost'
+        default: 'localhost'
+      port:
+        enum:
+          - '443'
+          - '8080'
+          - '8701'
+          - '80'
+        default: '8701'
+paths:
+  '/orders':
+    post:
+      operationId: createOrder
+      tags:
+        - orders
+      summary: Create a new Order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '200':
+          description: Order Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: unable to process the action
+  '/orders/{id}':
+    get:
+      operationId: getOrders
+      tags:
+        - orders
+      summary: retrieve an order
+      parameters:
+        - in: path
+          name: id
+          description: Order ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: bad input parameter
+components:
+  schemas:
+    Order:
+      type: object
+      required:
+        - symbol
+        - side
+        - type
+        - timeInForce
+        - quantity
+        - price
+        - timestamp
+        - signature
+      properties:
+        symbol:
+          type: string
+        side:
+          type: string
+          enum:
+            - BUY
+            - SELL
+        type:
+          type: string
+          enum:
+            - LIMIT
+            - MARKET
+        timeInForce:
+          type: string
+          enum:
+            - GTC
+        quantity:
+          type: number
+          minimum: 0
+        price:
+          type: number
+          minimum: 0
+        timestamp:
+          type: number
+        recvWindow:
+          type: integer
+          default: 60000
+        signature:
+          type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

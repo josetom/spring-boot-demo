@@ -1,0 +1,100 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://repo1.maven.org/maven2" }
+    }
+    dependencies {
+        classpath "org.openapitools:openapi-generator-gradle-plugin:5.0.0"
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '2.3.3.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'java'
+    id 'jacoco'
+    id 'application'
+}
+
+apply plugin: 'org.openapi.generator'
+
+group = 'com.dex.' + rootProject.name
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += 'src/main/generated-java'
+        }
+    }
+}
+
+dependencies {
+    // dependencies for generated core components
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+    implementation 'org.springframework:spring-core:5.3.1'
+    implementation 'org.springframework:spring-beans:5.3.1'
+    implementation 'org.springframework:spring-context:5.3.1'
+    implementation 'org.springframework.data:spring-data-commons-core:1.4.1.RELEASE'
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
+    implementation 'io.springfox:springfox-swagger2:2.9.2'
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+    implementation 'org.openapitools:jackson-databind-nullable:0.1.0'
+    implementation 'javax.validation:validation-api'
+
+    // service main dependencies
+    compile group: 'com.google.guava', name: 'guava', version: '30.1-jre'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.0'
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310',version : '2.12.1'
+    compile group: 'org.web3j', name: 'core', version: '4.8.3'
+
+//    implementation files('libs/binance-api-client-2.0.1-dex.jar') //TODO: this needs to be changed
+    implementation files('libs/binance-api-client-2.0.1-dex-jar-with-dependencies.jar') //TODO: this needs to be changed
+
+    testCompile group: 'junit', name: 'junit', version: '4.13.1'
+    testCompile group: 'org.testng', name: 'testng', version: '7.3.0'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '3.7.7'
+//    testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
+//    testCompile group: 'org.powermock', name: 'powermock-module-junit4-rule', version: '2.0.9'
+//    testCompile group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+
+}
+
+test {
+    useTestNG()
+    finalizedBy jacocoTestReport
+}
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "$rootDir/specs/openapi.yaml".toString()
+    outputDir = "$rootDir".toString()
+    apiPackage = group + ".api"
+    invokerPackage = group + ".invoker"
+    modelPackage = group + ".model"
+    configOptions = [
+            configPackage: group + ".configuration",
+            dateLibrary: "java8",
+            sourceFolder: "src/main/generated-java",
+            delegatePattern: "true",
+            unhandledException: "true"
+    ]
+}
+
+application {
+    mainClassName = group + ".invoker.OpenAPI2SpringBoot"
+}
+
+jacocoTestReport.dependsOn tasks.test

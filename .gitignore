@@ -1,0 +1,4 @@
+.gradle
+.idea
+.openapi-generator
+build
